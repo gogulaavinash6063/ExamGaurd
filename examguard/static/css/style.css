@@ -1,0 +1,359 @@
+/* ==============================================================
+   ExamGuard — shared styles
+   Design concept: an official examination hall crossed with a
+   monitoring console. Quiet, paper-toned pages for forms and
+   records; the live event log is the one place that gets to look
+   like an active instrument (dark, monospaced, blinking status).
+   ============================================================== */
+
+:root {
+  --ink: #12161f;
+  --ink-soft: #1c2333;
+  --paper: #f6f4ee;
+  --paper-raised: #ffffff;
+  --rule: #dcd8cc;
+  --slate: #4a5064;
+  --slate-soft: #7c8194;
+
+  --signal: #2f5d9f;
+  --signal-dark: #234874;
+  --confirm: #3c7a5a;
+  --warn: #b4791e;
+  --danger: #a83a3a;
+
+  --serif: Georgia, "Iowan Old Style", "Times New Roman", serif;
+  --sans: -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+/* -------------------- NAVBAR -------------------- */
+
+.navbar {
+  background: var(--ink);
+  color: #eceef2;
+  padding: 18px 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid var(--signal);
+}
+
+.navbar-brand {
+  font-family: var(--serif);
+  font-size: 20px;
+  letter-spacing: 0.3px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.logo-dot {
+  width: 9px;
+  height: 9px;
+  background: var(--signal);
+  display: inline-block;
+  border-radius: 50%;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 20px;
+  font-size: 14px;
+}
+
+.navbar-links a {
+  color: #cfd4e0;
+  text-decoration: none;
+}
+
+.navbar-links a:hover {
+  color: #ffffff;
+}
+
+/* -------------------- LAYOUT -------------------- */
+
+.page {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+}
+
+.page-narrow {
+  max-width: 480px;
+  margin: 0 auto;
+  padding: 64px 24px 80px;
+}
+
+/* -------------------- CARD -------------------- */
+
+.card {
+  background: var(--paper-raised);
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--signal);
+  border-radius: 4px;
+  padding: 32px;
+}
+
+.card + .card {
+  margin-top: 24px;
+}
+
+h1, h2, h3 {
+  font-family: var(--serif);
+  font-weight: normal;
+  margin: 0 0 6px;
+  color: var(--ink);
+}
+
+h1 { font-size: 28px; }
+h2 { font-size: 21px; }
+h3 { font-size: 17px; }
+
+.subtitle {
+  color: var(--slate-soft);
+  font-size: 14px;
+  margin: 0 0 28px;
+}
+
+/* -------------------- FORMS -------------------- */
+
+label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--slate);
+  margin: 18px 0 6px;
+}
+
+label:first-of-type { margin-top: 0; }
+
+input[type="text"],
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid var(--rule);
+  border-radius: 3px;
+  font-family: var(--sans);
+  font-size: 15px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--signal);
+  box-shadow: 0 0 0 3px rgba(47, 93, 159, 0.15);
+}
+
+/* -------------------- BUTTONS -------------------- */
+
+.btn {
+  display: inline-block;
+  font-family: var(--sans);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 11px 22px;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  text-align: center;
+}
+
+.btn-primary {
+  background: var(--signal);
+  color: #ffffff;
+}
+.btn-primary:hover { background: var(--signal-dark); }
+.btn-primary:disabled {
+  background: #b9c3d6;
+  cursor: not-allowed;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--slate);
+  border-color: var(--rule);
+}
+.btn-secondary:hover { border-color: var(--slate-soft); }
+
+.btn-danger {
+  background: var(--danger);
+  color: #ffffff;
+}
+.btn-danger:hover { background: #8c2f2f; }
+
+.btn-block { width: 100%; margin-top: 24px; }
+
+.btn-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+/* -------------------- BANNERS -------------------- */
+
+.banner {
+  padding: 12px 16px;
+  border-radius: 3px;
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.banner-error {
+  background: #fbeaea;
+  color: var(--danger);
+  border: 1px solid #e6bcbc;
+}
+
+.banner-success {
+  background: #eaf3ee;
+  color: var(--confirm);
+  border: 1px solid #bcdccb;
+}
+
+/* -------------------- STATUS INDICATORS -------------------- */
+
+.status-line {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  padding: 6px 0;
+}
+
+.status-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
+}
+
+.dot-neutral { background: var(--slate-soft); }
+.dot-good { background: var(--confirm); }
+.dot-warn { background: var(--warn); }
+.dot-bad { background: var(--danger); }
+
+.status-label {
+  color: var(--slate);
+  min-width: 150px;
+}
+
+.status-value { font-weight: 600; }
+
+/* -------------------- TABLE -------------------- */
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+th {
+  text-align: left;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--slate-soft);
+  font-weight: 600;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--rule);
+}
+
+td {
+  padding: 10px;
+  border-bottom: 1px solid var(--rule);
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+.badge {
+  font-family: var(--sans);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 3px;
+}
+
+.badge-progress { background: #e8eef8; color: var(--signal-dark); }
+.badge-paused { background: #f8f0e2; color: var(--warn); }
+.badge-submitted { background: #eaf3ee; color: var(--confirm); }
+
+/* -------------------- EVENT CONSOLE -------------------- */
+/* The one deliberately "loud" element on the site: a live
+   terminal-style log, distinct from the paper-toned forms. */
+
+.console {
+  background: var(--ink);
+  color: #b7d3ff;
+  font-family: var(--mono);
+  font-size: 13px;
+  border-radius: 4px;
+  padding: 16px;
+  height: 190px;
+  overflow-y: auto;
+}
+
+.console-line {
+  padding: 2px 0;
+  color: #a9b4c9;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.console-line .t {
+  color: #7a86a3;
+  margin-right: 8px;
+}
+
+.console-line.flag {
+  color: #ff9f9f;
+}
+
+/* -------------------- MISC -------------------- */
+
+.text-link {
+  color: var(--signal);
+}
+
+.helper-text {
+  color: var(--slate-soft);
+  font-size: 13px;
+  margin-top: 8px;
+}
+
+.photo-preview {
+  width: 100%;
+  max-width: 320px;
+  border-radius: 4px;
+  border: 1px solid var(--rule);
+  margin-top: 10px;
+}
+
+.candidate-avatar {
+  width: 56px;
+  height: 56px;
+  border-radius: 4px;
+  object-fit: cover;
+  border: 1px solid var(--rule);
+}
+
+.identity-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}

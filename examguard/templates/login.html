@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Sign in — ExamGuard{% endblock %}
+{% block main_class %}page-narrow{% endblock %}
+
+{% block nav_links %}
+    <a href="{{ url_for('register') }}">Register</a>
+{% endblock %}
+
+{% block content %}
+
+    <div class="card">
+
+        <h1>Candidate sign in</h1>
+        <p class="subtitle">Enter your registered email and password to begin an exam session.</p>
+
+        {% if registered %}
+            <div class="banner banner-success">
+                Registration complete. You can sign in now.
+            </div>
+        {% endif %}
+
+        {% if error %}
+            <div class="banner banner-error">{{ error }}</div>
+        {% endif %}
+
+        <form method="POST">
+
+            <label>Email</label>
+            <input type="email" name="email" required autofocus>
+
+            <label>Password</label>
+            <input type="password" name="password" required>
+
+            <button type="submit" class="btn btn-primary btn-block">Sign in</button>
+
+        </form>
+
+        <p class="helper-text">
+            No account yet? <a class="text-link" href="{{ url_for('register') }}">Register with your photo ID</a>.
+        </p>
+
+    </div>
+
+{% endblock %}

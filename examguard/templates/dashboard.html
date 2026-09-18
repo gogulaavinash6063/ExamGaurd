@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard — ExamGuard{% endblock %}
+
+{% block nav_links %}
+    <a href="{{ url_for('logout') }}">Log out</a>
+{% endblock %}
+
+{% block content %}
+
+    <div class="card">
+
+        <div class="identity-row">
+            {% if candidate['photo'] %}
+                <img class="candidate-avatar" src="/{{ candidate['photo'] }}" alt="Candidate photo">
+            {% endif %}
+            <div>
+                <h1 style="margin-bottom:2px;">Welcome, {{ candidate['name'] }}</h1>
+                <p class="subtitle" style="margin:0;">{{ candidate['email'] }}</p>
+            </div>
+        </div>
+
+        <p style="color:var(--slate);">
+            When you're ready, start your examination. Your camera and browser activity
+            will be monitored for the duration of the session, as outlined in your
+            exam instructions.
+        </p>
+
+        <a href="{{ url_for('start_exam') }}" class="btn btn-primary">Start examination</a>
+
+    </div>
+
+    <div class="card">
+
+        <h2>Your recent sessions</h2>
+
+        {% if recent_sessions %}
+            <table>
+                <thead>
+                    <tr>
+                        <th>Session</th>
+                        <th>Status</th>
+                        <th>Started</th>
+                        <th>Submitted</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in recent_sessions %}
+                    <tr>
+                        <td>{{ s['session_id'][:8] }}…</td>
+                        <td>
+                            {% if s['status'] == 'submitted' %}
+                                <span class="badge badge-submitted">submitted</span>
+                            {% elif s['status'] == 'paused' %}
+                                <span class="badge badge-paused">paused</span>
+                            {% else %}
+                                <span class="badge badge-progress">in progress</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ s['started_at'][:19] }}</td>
+                        <td>{{ s['submitted_at'][:19] if s['submitted_at'] else '—' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="helper-text">No exam sessions yet.</p>
+        {% endif %}
+
+    </div>
+
+{% endblock %}
