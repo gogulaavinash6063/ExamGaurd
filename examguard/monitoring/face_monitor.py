@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+from datetime import datetime
+from database import get_db
 
 # Pre-trained Haar Cascade classifier that ships with OpenCV.
 # The project spec explicitly calls for this (no custom model
@@ -36,3 +38,67 @@ def detect_face(image_data):
     )
 
     return len(faces) > 0
+
+def close_open_face_event(
+    candidate_id,
+    session_id
+):
+
+    connection = get_db()
+
+    try:
+
+        row = connection.execute("""
+            SELECT *
+            FROM face_events
+            WHERE candidate_id = ?
+            AND session_id = ?
+            AND ended_at IS NULL
+            ORDER BY id DESC
+            LIMIT 1
+        """, (
+            candidate_id,
+            session_id
+        )).fetchone()
+
+
+        # No open face event
+        if not row:
+
+            return
+
+
+        ended_at = datetime.now()
+
+
+        started_at = datetime.fromisoformat(
+            row["started_at"]
+        )
+
+
+        duration = (
+            ended_at - started_at
+        ).total_seconds()
+
+
+        connection.execute("""
+            UPDATE face_events
+
+            SET
+                ended_at = ?,
+                duration_seconds = ?
+
+            WHERE id = ?
+        """, (
+            ended_at.isoformat(),
+            duration,
+            row["id"]
+        ))
+
+
+        connection.commit()
+
+    finally:
+
+        connection.close()
+
