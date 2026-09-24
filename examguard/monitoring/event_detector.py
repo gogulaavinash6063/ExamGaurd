@@ -13,10 +13,10 @@ from datetime import datetime, timedelta
 # ------------------------------------------------------------
 # CONFIGURABLE THRESHOLDS
 # ------------------------------------------------------------
-TAB_SWITCH_LIMIT = 3                 # more than 3 tab switches -> flag
-FACE_ABSENT_SECONDS_LIMIT = 120      # face absent > 2 minutes -> flag
-FOCUS_LOSS_LIMIT = 5                 # more than 5 focus-loss events...
-FOCUS_LOSS_WINDOW_SECONDS = 300      # ...within a 5 minute window -> flag
+TAB_SWITCH_LIMIT = 3
+FACE_ABSENT_SECONDS_LIMIT = 120 
+FOCUS_LOSS_LIMIT = 5
+FOCUS_LOSS_WINDOW_SECONDS = 300
 
 
 def _already_flagged(connection, session_id, event_type):
