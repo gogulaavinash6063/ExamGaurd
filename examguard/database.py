@@ -120,19 +120,19 @@ def init_db():
     #         FOREIGN KEY (candidate_id) REFERENCES candidates(id)
     #     )
     # """)
-    connection.execute("""
-        CREATE TABLE IF NOT EXISTS integrity_scores (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            session_id TEXT UNIQUE NOT NULL,
-            candidate_id INTEGER NOT NULL,
-            event_penalty REAL NOT NULL,
-            face_presence_ratio REAL NOT NULL,
-            integrity_score REAL NOT NULL,
-            risk_level TEXT NOT NULL,
-            computed_at TEXT NOT NULL,
-            FOREIGN KEY (candidate_id) REFERENCES candidates(id)
-        )
-    """)
+    # connection.execute("""
+    #     CREATE TABLE IF NOT EXISTS integrity_scores (
+    #         id INTEGER PRIMARY KEY AUTOINCREMENT,
+    #         session_id TEXT UNIQUE NOT NULL,
+    #         candidate_id INTEGER NOT NULL,
+    #         event_penalty REAL NOT NULL,
+    #         face_presence_ratio REAL NOT NULL,
+    #         integrity_score REAL NOT NULL,
+    #         risk_level TEXT NOT NULL,
+    #         computed_at TEXT NOT NULL,
+    #         FOREIGN KEY (candidate_id) REFERENCES candidates(id)
+    #     )
+    # """)
 
     connection.commit()
     connection.close()
