@@ -185,36 +185,92 @@ def create_integrity_report():
     # llm->prompt
     return chain
     
-def test_integrity_report():
-    context={
-            "integrity_score": 85,
-            "risk_level": "low",
-            "event_penalty": 15,
-            "face_presence_ratio": 98,
-            "computed_at": "2024-06-01 12:00:00",
-            "browser_events": [
-                {"event_type": "tab_switch", "event_time": "2024-06-01 12:05:00", "details": None},
-                {"event_type": "focus_loss", "event_time": "2024-06-01 12:10:00", "details": None}
-            ],
-            "face_events": [
-                {"started_at": "2024-06-01 12:00:00", "ended_at": "2024-06-01 12:30:00", "duration_seconds": 1800}
-            ]
-        }
+# def test_integrity_report():
+#     context={
+#             "integrity_score": 85,
+#             "risk_level": "low",
+#             "event_penalty": 15,
+#             "face_presence_ratio": 98,
+#             "computed_at": "2024-06-01 12:00:00",
+#             "browser_events": [
+#                 {"event_type": "tab_switch", "event_time": "2024-06-01 12:05:00", "details": None},
+#                 {"event_type": "focus_loss", "event_time": "2024-06-01 12:10:00", "details": None}
+#             ],
+#             "face_events": [
+#                 {"started_at": "2024-06-01 12:00:00", "ended_at": "2024-06-01 12:30:00", "duration_seconds": 1800}
+#             ]
+#         }
+#     chain = create_integrity_report()
+#     response = chain.invoke(context)
+
+#     print("\n==============================")
+#     print("EXAMGUARD INTEGRITY REPORT")
+#     print("==============================\n")
+
+#     print(response.content)
+
+def generate_real_integrity_report(candidate_id,session_id):
+    session_data = get_session_data(candidate_id, session_id)
     chain = create_integrity_report()
-    response = chain.invoke(context)
+    report_context = prepare_report_context(session_data)
+    response = chain.invoke(report_context)
+    report = response.content
+    validation = validate_ai_report(report, report_context)
+    if not validation["valid"]:
+        raise ValueError(
+            f"ai report validation failed {validation["reason"]}"
+        )
+        
+    return report
 
-    print("\n==============================")
-    print("EXAMGUARD INTEGRITY REPORT")
-    print("==============================\n")
 
-    print(response.content)
+def validate_ai_report(report, report_context):
+    if not report:
+        return{
+            "valid":False,
+            "reason":"AI Report is empty"
+        }
+    integrity_score = str(report_context["integrity_score"])
+    risk_level = str(report_context["risk_level"])
+    if integrity_score not in report:
+        return{
+            "valid":False,
+            "reason":"Integrity score missing from ai report"
+        }
+    if risk_level not in report:
+        return{
+            "valid":False,
+            "reason":"Risk level missing from ai report"
+        }
+    forbidden_pharases =[
+        "proved cheated",
+        "proved misconduct",
+        "definetly cheated",
+        "candidate cheated"
+    ]
+    
+    report_lower = report.lower()
+    
+    for pharases in forbidden_pharases:
+        if pharases in report_lower:
+            return{
+                "valid":False,
+                "reason":"unsafe pharases found : {pharase}"
+            }
+        
+    return{
+        "valid":True,
+        "Reason":"Ai report validation done"
+    }
     
     
 
 # chatopenai : creates connection between python application and openai chat model
 # 
 
-if __name__ == "__main__":
-    # test_prompt()
-    # test_llm()
-     test_integrity_report()
+# if __name__ == "__main__":
+#     # test_prompt()
+#     # test_llm()
+#     #  test_integrity_report()
+#     report = generate_real_integrity_report(candidate_id=1, session_id="92475ce8-6cf8-42f1-847c-fa4cca1c5cfc")
+#     print(report)
