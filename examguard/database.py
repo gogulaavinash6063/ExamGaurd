@@ -133,6 +133,23 @@ def init_db():
     #         FOREIGN KEY (candidate_id) REFERENCES candidates(id)
     #     )
     # """)
+    
+    results = connection.execute("""
+        SELECT
+            id,
+            candidate_id,
+            session_id,
+            integrity_score,
+            risk_level,
+            event_penalty,
+            face_presence_ratio
+        FROM integrity_scores;
+    """).fetchall()
+
+    print("results:")
+
+    for row in results:
+        print(dict(row))
 
     connection.commit()
     connection.close()
