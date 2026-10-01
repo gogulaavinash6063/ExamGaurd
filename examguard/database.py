@@ -133,6 +133,51 @@ def init_db():
     #         FOREIGN KEY (candidate_id) REFERENCES candidates(id)
     #     )
     # """)
+    
+    connection.execute("""
+           CREATE TABLE IF NOT EXISTS alerts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                candidate_id INTEGER NOT NULL,
+                session_id TEXT NOT NULL,
+                alert_type TEXT NOT NULL,
+                message TEXT NOT NULL,
+                severity TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'open',
+                created_at TEXT NOT NULL,
+                FOREIGN KEY (candidate_id) REFERENCES candidates(id)
+            );               
+    """)
+    
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS incident_logs (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            candidate_id INTEGER NOT NULL,
+            session_id TEXT NOT NULL,
+            event_type TEXT NOT NULL,
+            description TEXT NOT NULL,
+            severity TEXT NOT NULL,
+            event_time TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (candidate_id) REFERENCES candidates(id)
+        );                  
+    """)
+    
+    results = connection.execute("""
+        SELECT
+            id,
+            candidate_id,
+            session_id,
+            integrity_score,
+            risk_level,
+            event_penalty,
+            face_presence_ratio
+        FROM integrity_scores;
+    """).fetchall()
+
+    # print("results:")
+
+    # for row in results:
+        # print(dict(row))
 
     connection.commit()
     connection.close()

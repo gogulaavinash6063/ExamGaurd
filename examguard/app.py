@@ -13,6 +13,8 @@ from monitoring import event_detector
 from monitoring.integrity_score import compute_integrity_score
 from monitoring.face_monitor import close_open_face_event
 
+from ai.integrity_agent import generate_real_integrity_report
+
 
 app = Flask(__name__)
 app.secret_key = "examguard-secret-key"
@@ -359,6 +361,17 @@ def submit_exam():
         candidate_id,
         exam_session_id
     )
+    
+    # --------------------------------------------------
+    # 5. Generate integrity report using AI agent
+    # --------------------------------------------------
+    report = generate_real_integrity_report(
+        candidate_id,
+        exam_session_id
+    )
+    
+    print("AI-Generated Integrity Report:")
+    print(report)
 
 
     # --------------------------------------------------
