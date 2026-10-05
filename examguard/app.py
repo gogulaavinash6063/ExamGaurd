@@ -14,6 +14,7 @@ from monitoring.integrity_score import compute_integrity_score
 from monitoring.face_monitor import close_open_face_event
 
 from ai.integrity_agent import generate_real_integrity_report
+from monitoring.incident_logger import create_incident
 
 
 app = Flask(__name__)
@@ -483,9 +484,18 @@ def log_browser_event():
         connection.commit()
 
         # Run the rule-based suspicious event detection engine
-        event_detector.evaluate_browser_event(
+        suspicious = event_detector.evaluate_browser_event(
             connection, candidate_id, exam_session_id, event_type
         )
+        
+        if suspicious:
+            create_incident(candidate_id = candidate_id,
+                            session_id= exam_session_id,
+                            event_type=event_type,
+                            description=details or f"{event_type} detected",
+                            severity="Medium"
+                            )
+            
 
     except Exception as e:
         connection.rollback()
