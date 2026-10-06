@@ -162,20 +162,27 @@ def init_db():
     #     );                  
     # """)
     
+    connection.execute("""
+    
+        CREATE TABLE IF NOT EXISTS evidence (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            candidate_id INTEGER NOT NULL,
+            session_id TEXT NOT NULL,
+            evidence_type TEXT NOT NULL,
+            filename TEXT,
+            mime_type TEXT NOT NULL,
+            file_data BLOB NOT NULL,
+            sha256_hash TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+            FOREIGN KEY (candidate_id) REFERENCES candidates(id)
+        );
+    """)
+    
     results = connection.execute("""
-        SELECT
-            id,
-            candidate_id,
-            session_id,
-            event_type,
-            description,
-            severity,
-            event_time,
-            created_at
-        FROM incident_logs;
+        SELECT * FROM evidence;
     """).fetchall()
 
-    print("results:")
+    print("results:", results)
 
     for row in results:
         print(dict(row))
