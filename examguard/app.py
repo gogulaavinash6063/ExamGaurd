@@ -15,6 +15,7 @@ from monitoring.face_monitor import close_open_face_event
 
 from ai.integrity_agent import generate_real_integrity_report
 from monitoring.incident_logger import create_incident
+from monitoring.alert_manager import create_alert, create_risk_alert
 
 
 app = Flask(__name__)
@@ -363,6 +364,17 @@ def submit_exam():
         exam_session_id
     )
     
+    # connection alert to integrity score
+    
+    create_risk_alert(
+        candidate_id=candidate_id,
+        session_id=exam_session_id,
+        risk_level=result["risk_level"],
+        integrity_score=result["integrity_score"]
+    )
+    
+    
+    
     # --------------------------------------------------
     # 5. Generate integrity report using AI agent
     # --------------------------------------------------
@@ -482,19 +494,35 @@ def log_browser_event():
         ))
 
         connection.commit()
+        
+        print("================================")
+        print("BROWSER EVENT RECEIVED")
+        print("candidate_id:", candidate_id)
+        print("session_id:", exam_session_id)
+        print("event_type:", event_type)
+        print("details:", details)
+        print("================================")
 
         # Run the rule-based suspicious event detection engine
-        suspicious = event_detector.evaluate_browser_event(
+        rule_results = event_detector.evaluate_browser_event(
             connection, candidate_id, exam_session_id, event_type
         )
         
-        if suspicious:
+        print("rule_results:", rule_results)
+        
+        if rule_results:
             create_incident(candidate_id = candidate_id,
                             session_id= exam_session_id,
-                            event_type=event_type,
-                            description=details or f"{event_type} detected",
-                            severity="Medium"
+                            event_type=rule_results["event_type"],
+                            description=rule_results["description"],
+                            severity=rule_results["severity"]
                             )
+            create_alert(candidate_id = candidate_id,
+                         session_id= exam_session_id,
+                         alert_type=rule_results["event_type"],
+                         message=rule_results["description"],
+                         severity=rule_results["severity"]
+            )
             
 
     except Exception as e:
