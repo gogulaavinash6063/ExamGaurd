@@ -1,5 +1,15 @@
 from datetime import datetime
+import hashlib
+
 from database import get_db
+
+
+def calculate_sha256(file_data):
+    """
+    Calculate SHA-256 hash of binary file data.
+    """
+
+    return hashlib.sha256(file_data).hexdigest()
 
 
 def save_evidence(
@@ -8,17 +18,34 @@ def save_evidence(
     evidence_type,
     filename,
     mime_type,
-    file_data,
-    sha256_hash
+    file_data
 ):
     """
-    Store examination evidence in the database.
+    Save examination evidence into the database.
+
+    The SHA-256 hash is calculated from the actual
+    binary file data before storing the evidence.
     """
 
     connection = get_db()
 
     try:
+
+        # --------------------------------------------------
+        # Calculate SHA-256
+        # --------------------------------------------------
+
+        sha256_hash = calculate_sha256(file_data)
+
+        # --------------------------------------------------
+        # Current timestamp
+        # --------------------------------------------------
+
         created_at = datetime.now().isoformat()
+
+        # --------------------------------------------------
+        # Save evidence
+        # --------------------------------------------------
 
         connection.execute("""
             INSERT INTO evidence
@@ -54,11 +81,14 @@ def save_evidence(
         print("Evidence     :", evidence_type)
         print("Filename     :", filename)
         print("MIME Type    :", mime_type)
-        print("Hash         :", sha256_hash)
+        print("SHA-256      :", sha256_hash)
         print("Created At   :", created_at)
         print("================================")
 
-        return True
+        return {
+            "success": True,
+            "sha256_hash": sha256_hash
+        }
 
     except Exception:
         connection.rollback()
@@ -67,29 +97,68 @@ def save_evidence(
     finally:
         connection.close()
 
-if __name__ == "__main__":
 
-    test_data = b"TEST SCREENSHOT DATA"
+def get_evidence(evidence_id):
+    """
+    Retrieve one evidence record.
+    """
 
-    result = save_evidence(
-        candidate_id=1,
-        session_id="test-evidence-session",
-        evidence_type="screenshot",
-        filename="test_screenshot.jpg",
-        mime_type="image/jpeg",
-        file_data=test_data,
-        sha256_hash="test-hash"
-    )
+    connection = get_db()
 
-    print("Evidence result:", result)
+    try:
 
+        row = connection.execute("""
+            SELECT
+                id,
+                candidate_id,
+                session_id,
+                evidence_type,
+                filename,
+                mime_type,
+                file_data,
+                sha256_hash,
+                created_at
+            FROM evidence
+            WHERE id = ?
+        """, (evidence_id,)).fetchone()
 
-# flow
+        return row
 
-# Screenshot
-    # ↓
-# JPEG/PNG bytes
-    # ↓
-# file_data
-    # ↓
-# SQLite BLOB
+    finally:
+        connection.close()
+        
+        
+def verify_evidence(evidence_id):
+    connection = get_db()
+    
+    try:
+        row = connection.execute("""
+            SELECT id, file_data, sha256_hash from evidence WHERE id = ?
+        """, (evidence_id,)).fetchone()
+        
+        if row is None:
+            return {
+                "success": False,
+                "message": "Evidence not found"
+            }
+        stored_hash = row["sha256_hash"]
+        calculated_hash = calculate_sha256(row["file_data"])
+
+        if stored_hash == calculated_hash:
+            return {
+                "success": True,
+                "message": "Evidence is valid",
+                "evidence_id": row["id"],
+                "stored_hash": stored_hash,
+                "calculated_hash": calculated_hash
+            }
+        else:
+            return {
+                "success": False,
+                "message": "Evidence is invalid",
+                "evidence_id": row["id"],
+                "stored_hash": stored_hash, 
+                "calculated_hash": calculated_hash
+            }
+    finally:
+        connection.close()
