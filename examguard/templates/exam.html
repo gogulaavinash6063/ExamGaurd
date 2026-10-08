@@ -80,6 +80,7 @@
 
                 <video id="camera" autoplay playsinline></video>
                 <canvas id="canvas"></canvas>
+                <video id="screenVideo" autoplay muted style="display: none;"></video>
             </div>
 
             <div class="card">
@@ -119,6 +120,8 @@ print(x + 5)</pre>
     const cameraDot = document.getElementById("camera-dot");
     const faceStatus = document.getElementById("face-status");
     const faceDot = document.getElementById("face-dot");
+
+    let screenStream = null;
 
     navigator.mediaDevices.getUserMedia({ video: true, audio: false })
         .then(function (stream) {
@@ -168,13 +171,58 @@ print(x + 5)</pre>
 
         fetch("/log-browser-event", {
             method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ event_type: eventType, details: details })
-        })
-        .then(response => response.json())
-        .catch(error => console.error("Browser event error:", error));
 
-        displayEvent(eventType, details);
+            headers: {
+                "Content-Type": "application/json"
+            },
+
+            body: JSON.stringify({
+                event_type: eventType,
+                details: details
+            })
+        })
+
+        .then(response => response.json())
+
+        .then(result => {
+
+            console.log(
+                "Browser event result:",
+                result
+            );
+
+            // ---------------------------------------------
+            // Dynamic screenshot trigger
+            // ---------------------------------------------
+
+            if (result.screenshot_required) {
+
+                console.log(
+                    "Suspicious event detected."
+                );
+
+                console.log(
+                    "Capturing screenshot..."
+                );
+
+                sendScreenshot();
+            }
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Browser event error:",
+                error
+            );
+
+        });
+
+        displayEvent(
+            eventType,
+            details
+        );
     }
 
     function displayEvent(eventType, details) {
@@ -194,6 +242,8 @@ print(x + 5)</pre>
 
     window.addEventListener("load", function () {
         logBrowserEvent("exam_started", "Candidate opened examination page");
+        startScreenCapture();
+        
     });
 
     document.addEventListener("visibilitychange", function () {
@@ -298,6 +348,183 @@ print(x + 5)</pre>
                 window.location.href = data.redirect || "/dashboard";
             });
     });
+
+    // start camera and ask permission for screen capture
+    
+    async function startScreenCapture() {
+
+    try {
+
+        screenStream =
+            await navigator.mediaDevices.getDisplayMedia({
+                video: true
+            });
+
+        const video =
+            document.getElementById("screenVideo");
+
+        video.srcObject = screenStream;
+
+        console.log(
+            "Screen capture started."
+        );
+
+        // Detect when candidate stops sharing
+        const videoTrack =
+            screenStream.getVideoTracks()[0];
+
+        videoTrack.addEventListener(
+            "ended",
+            function () {
+
+                console.log(
+                    "Screen sharing stopped."
+                );
+
+                screenStream = null;
+            }
+        );
+
+    } catch (error) {
+
+        console.error(
+            "Screen capture permission denied:",
+            error
+        );
+
+        screenStream = null;
+    }
+}
+
+function captureScreenshot() {
+
+    const video =
+        document.getElementById(
+            "screenVideo"
+        );
+
+    if (!video) {
+
+        console.error(
+            "Screen video element not found."
+        );
+
+        return null;
+    }
+
+    if (
+        video.readyState < 2 ||
+        video.videoWidth === 0 ||
+        video.videoHeight === 0
+    ) {
+
+        console.error(
+            "Screen video is not ready."
+        );
+
+        return null;
+    }
+
+    const canvas =
+        document.createElement(
+            "canvas"
+        );
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+    const context =
+        canvas.getContext("2d");
+
+    context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    return canvas.toDataURL(
+        "image/jpeg",
+        0.8
+    );
+}
+
+async function sendScreenshot() {
+
+    const screenshot =
+        captureScreenshot();
+
+    if (!screenshot) {
+
+        console.error(
+            "Screenshot could not be captured."
+        );
+
+        return;
+    }
+
+    try {
+
+        const response =
+            await fetch(
+                "/upload-evidence",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        evidence_type:
+                            "screenshot",
+
+                        image:
+                            screenshot
+                    })
+                }
+            );
+
+        const result =
+            await response.json();
+
+        console.log(
+            "Screenshot upload result:",
+            result
+        );
+
+        if (result.success) {
+
+            console.log(
+                "Screenshot evidence saved."
+            );
+
+            console.log(
+                "SHA-256:",
+                result.sha256_hash
+            );
+
+        } else {
+
+            console.error(
+                "Evidence upload failed:",
+                result.message
+            );
+        }
+
+    } catch (error) {
+
+        console.error(
+            "Screenshot upload error:",
+            error
+        );
+    }
+}
 
 </script>
 

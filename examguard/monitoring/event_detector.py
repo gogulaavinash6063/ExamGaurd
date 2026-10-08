@@ -156,16 +156,27 @@ def check_focus_loss_frequency(
 # ------------------------------------------------------------
 # RULE: face absent for too long
 # ------------------------------------------------------------
-def check_face_absence(connection, candidate_id, session_id, ongoing_seconds):
+def check_face_absence(
+    connection,
+    candidate_id,
+    session_id,
+    ongoing_seconds
+):
+
     if ongoing_seconds > FACE_ABSENT_SECONDS_LIMIT:
-        _raise_flag(
-            connection, candidate_id, session_id,
+
+        return _raise_flag(
+            connection,
+            candidate_id,
+            session_id,
             "excessive_face_absence",
             f"Candidate's face has been absent from the camera for "
             f"{int(ongoing_seconds)} seconds, exceeding the "
             f"{FACE_ABSENT_SECONDS_LIMIT}-second limit.",
-            "High",
+            "High"
         )
+
+    return None
 
 
 # ------------------------------------------------------------

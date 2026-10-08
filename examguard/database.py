@@ -178,6 +178,19 @@ def init_db():
         );
     """)
     
+    connection.execute("""
+        CREATE TABLE IF NOT EXISTS ai_reports (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            candidate_id INTEGER NOT NULL,
+            session_id TEXT NOT NULL,
+            report TEXT NOT NULL,
+            created_at TEXT NOT NULL,
+
+            FOREIGN KEY (candidate_id)
+                REFERENCES candidates(id)
+        );
+   """)
+    
     results = connection.execute("""
         SELECT * FROM evidence;
     """).fetchall()
